@@ -10,8 +10,8 @@ android {
         applicationId "com.example.chargingcalculator"
         minSdk 24
         targetSdk 34
-        versionCode 1
-        versionName "1.0"
+        versionCode (System.getenv("BUILD_NUMBER") ? System.getenv("BUILD_NUMBER").toInteger() : 1)
+        versionName "1.0." + (System.getenv("BUILD_NUMBER") ?: "0")
     }
 
     signingConfigs {
