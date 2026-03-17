@@ -10,6 +10,8 @@ jobs:
   build:
     name: Build Debug APK
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout code
@@ -27,9 +29,17 @@ jobs:
       - name: Build Debug APK
         run: ./gradlew assembleDebug --no-daemon
 
-      - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
+      - name: Rename APK with build number
+        run: |
+          cp app/build/outputs/apk/debug/app-debug.apk \
+             app/build/outputs/apk/debug/ChargingCalculator-debug-${{ github.run_number }}.apk
+
+      - name: Create or update Release and upload APK
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
         with:
-          name: app-debug
-          path: app/build/outputs/apk/debug/app-debug.apk
-          retention-days: 7
+          tag_name: build-${{ github.run_number }}
+          name: "Build #${{ github.run_number }}"
+          body: |
+            Automated debug build from commit ${{ github.sha }}
+          files: app/build/outputs/apk/debug/ChargingCalculator-debug-${{ github.run_number }}.apk
