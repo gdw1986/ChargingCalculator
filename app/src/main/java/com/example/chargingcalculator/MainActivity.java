@@ -314,35 +314,38 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * 自动模式：通过"开始充电"/"结束充电"关键词分别提取两个时间
+     * 自动模式：通过"开始充电"/"充电结束"关键词分别提取两个时间。
+     *
+     * 截图格式示例：
+     *   9:26  <-- 开始时间在关键词前面
+     *   开始充电
+     *   16:23 <-- 结束时间在关键词前面
+     *   充电结束
+     *
      * 匹配策略（按优先级）：
-     *   1. 在"开始充电"附近的行找时间 → 开始时间
-     *      在"结束充电"附近的行找时间 → 结束时间
-     *   2. 如果没有关键词，则取识别到的最小时间=开始，最大时间=结束
+     *   1. 找到含关键词的行，在该行及其前 3 行内找 H:MM / HH:MM 时间
+     *   2. 如果没有关键词，取全图所有时间，小的=开始，大的=结束
      *   3. 兜底：只识别到一个时间，两个字段都填
      */
     private void handleOcrAutoResult(String text) {
-        // 按行分割
         String[] lines = text.split("\\n");
 
         String startTime = null;
         String endTime   = null;
 
-        // --- 策略1：关键词匹配 ---
-        // 扫描每一行，找到含关键词的行，然后在该行及其后 3 行内找时间
+        // --- 策略1：关键词匹配，在关键词行及其前 3 行找时间 ---
         for (int i = 0; i < lines.length; i++) {
             String line = lines[i];
             boolean isStartLine = line.contains("开始充电") || line.contains("开始充電");
-            boolean isEndLine   = line.contains("结束充电") || line.contains("結束充電")
-                                || line.contains("充电结束") || line.contains("充電結束");
+            boolean isEndLine   = line.contains("充电结束") || line.contains("充電結束")
+                                || line.contains("结束充电") || line.contains("結束充電");
 
             if (isStartLine || isEndLine) {
-                // 在该行及向后 3 行内找时间
+                // 在该行及向前 3 行内找时间（时间在关键词前面）
                 String timeFound = null;
-                for (int j = i; j < Math.min(i + 4, lines.length); j++) {
+                for (int j = i; j >= Math.max(0, i - 3); j--) {
                     List<String> ts = extractTimes(lines[j]);
                     if (!ts.isEmpty()) {
-                        // 优先选择精确格式（含日期的）
                         timeFound = ts.get(0);
                         break;
                     }
@@ -358,7 +361,6 @@ public class MainActivity extends AppCompatActivity {
         if (startTime == null && endTime == null) {
             List<String> allTimes = extractTimes(text);
             if (allTimes.size() >= 2) {
-                // 按时间值排序
                 allTimes.sort((a, b) -> {
                     int[] ta = parseHourMinuteSecond(a);
                     int[] tb = parseHourMinuteSecond(b);
@@ -428,35 +430,36 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * 从文本中提取所有时间字符串，优先提取 yyyy-MM-dd HH:mm:ss 中的时间部分，
-     * 然后匹配独立的 HH:mm:ss / HH:mm 格式
+     * 从文本中提取所有时间字符串。
+     *
+     * 优先级1：独立的 H:MM 或 HH:MM（前后不紧跟数字/冒号/连字符，避免误匹配日期）
+     * 优先级2：yyyy-MM-dd HH:mm:ss / yyyy-MM-dd HH:mm 中的时间部分（兜底）
      */
     private List<String> extractTimes(String text) {
         List<String> result = new ArrayList<>();
 
-        // 优先级1：yyyy-MM-dd HH:mm:ss 或 yyyy-MM-dd HH:mm
-        Pattern dateTimePattern = Pattern.compile(
-                "\\d{4}-\\d{2}-\\d{2}\\s+([01]?\\d|2[0-3]):([0-5]\\d)(?::([0-5]\\d))?");
-        Matcher dtMatcher = dateTimePattern.matcher(text);
-        while (dtMatcher.find()) {
-            String h = dtMatcher.group(1);
-            String m = dtMatcher.group(2);
-            String s = dtMatcher.group(3);
-            String formatted = s != null
-                    ? String.format(Locale.getDefault(), "%02d:%s:%s", Integer.parseInt(h), m, s)
-                    : String.format(Locale.getDefault(), "%02d:%s", Integer.parseInt(h), m);
+        // 优先级1：H:MM 或 HH:MM（独立时间，前后不是数字或额外的冒号）
+        // 负向后顾：前面不能是数字或连字符（避免匹配日期里的 MM-dd）
+        // 负向前瞻：后面不能紧跟冒号+数字（避免匹配 HH:mm:ss 中间片段）
+        Pattern timePattern = Pattern.compile(
+                "(?<![\\d\\-:])([01]?\\d|2[0-3]):([0-5]\\d)(?!:\\d)(?!\\d)");
+        Matcher tMatcher = timePattern.matcher(text);
+        while (tMatcher.find()) {
+            String h = tMatcher.group(1);
+            String m = tMatcher.group(2);
+            String formatted = String.format(Locale.getDefault(), "%02d:%s", Integer.parseInt(h), m);
             if (!result.contains(formatted)) result.add(formatted);
         }
 
-        // 优先级2：独立时间（前后不是数字/日期连字符）
+        // 优先级2：yyyy-MM-dd HH:mm:ss 或 yyyy-MM-dd HH:mm（没找到独立时间时兜底）
         if (result.isEmpty()) {
-            Pattern timePattern = Pattern.compile(
-                    "(?<![\\d\\-])([01]?\\d|2[0-3]):([0-5]\\d)(?::([0-5]\\d))?(?![\\d])");
-            Matcher tMatcher = timePattern.matcher(text);
-            while (tMatcher.find()) {
-                String h = tMatcher.group(1);
-                String m = tMatcher.group(2);
-                String s = tMatcher.group(3);
+            Pattern dateTimePattern = Pattern.compile(
+                    "\\d{4}-\\d{2}-\\d{2}\\s+([01]?\\d|2[0-3]):([0-5]\\d)(?::([0-5]\\d))?");
+            Matcher dtMatcher = dateTimePattern.matcher(text);
+            while (dtMatcher.find()) {
+                String h = dtMatcher.group(1);
+                String m = dtMatcher.group(2);
+                String s = dtMatcher.group(3);
                 String formatted = s != null
                         ? String.format(Locale.getDefault(), "%02d:%s:%s", Integer.parseInt(h), m, s)
                         : String.format(Locale.getDefault(), "%02d:%s", Integer.parseInt(h), m);
