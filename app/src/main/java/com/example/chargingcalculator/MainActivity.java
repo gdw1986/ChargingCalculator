@@ -1,6 +1,7 @@
 package com.example.chargingcalculator;
 
 import android.Manifest;
+import android.util.Log;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -282,11 +283,20 @@ public class MainActivity extends AppCompatActivity {
             recognizer.process(image)
                     .addOnSuccessListener(visionText -> {
                         String fullText = visionText.getText();
-                        if (ocrMode == OCR_MODE_AUTO) {
-                            handleOcrAutoResult(fullText);
-                        } else {
-                            handleOcrSingleResult(fullText);
-                        }
+                        Log.d("OCR_RAW", "=== OCR原始文本 ===\n" + fullText + "\n==================");
+                        // 调试：弹窗显示原始识别文本
+                        new androidx.appcompat.app.AlertDialog.Builder(this)
+                                .setTitle("OCR 原始文本（调试）")
+                                .setMessage(fullText)
+                                .setPositiveButton("继续识别", (d, w) -> {
+                                    if (ocrMode == OCR_MODE_AUTO) {
+                                        handleOcrAutoResult(fullText);
+                                    } else {
+                                        handleOcrSingleResult(fullText);
+                                    }
+                                })
+                                .setNegativeButton("取消", null)
+                                .show();
                     })
                     .addOnFailureListener(e ->
                             Toast.makeText(this, "识别失败：" + e.getMessage(), Toast.LENGTH_LONG).show());
