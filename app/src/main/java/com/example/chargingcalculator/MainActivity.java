@@ -403,7 +403,6 @@ public class MainActivity extends AppCompatActivity {
                 endTime   = allTimes.get(0);
             }
         }
-        }
 
         // --- 应用结果 ---
         if (startTime == null && endTime == null) {
