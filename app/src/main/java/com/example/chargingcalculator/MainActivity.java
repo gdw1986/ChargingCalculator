@@ -316,16 +316,20 @@ public class MainActivity extends AppCompatActivity {
     /**
      * 自动模式：通过"开始充电"/"充电结束"关键词分别提取两个时间。
      *
-     * 截图格式示例：
-     *   9:26  <-- 开始时间在关键词前面
-     *   开始充电
-     *   16:23 <-- 结束时间在关键词前面
-     *   充电结束
+     * 截图实际格式（时间与关键词在同一行）：
+     *   结束充电提醒
+     *   灰驴子在3月17日16:23充电结束，当前电量100%。
+     *   2026-03-17 16:23:52
+     *
+     *   开始充电提醒
+     *   灰驴子在3月17日9:26开始充电，当前电量15%。
+     *   2026-03-17 09:26:11
      *
      * 匹配策略（按优先级）：
-     *   1. 找到含关键词的行，在该行及其前 3 行内找 H:MM / HH:MM 时间
-     *   2. 如果没有关键词，取全图所有时间，小的=开始，大的=结束
-     *   3. 兜底：只识别到一个时间，两个字段都填
+     *   1. 找到含关键词的行，先在该行本身提取时间
+     *   2. 该行没有则向前最多3行找，但不跨越含另一关键词的行
+     *   3. 如果没有关键词，取全图所有时间，小的=开始，大的=结束
+     *   4. 兜底：只识别到一个时间，两个字段都填
      */
     private void handleOcrAutoResult(String text) {
         String[] lines = text.split("\\n");
@@ -333,27 +337,43 @@ public class MainActivity extends AppCompatActivity {
         String startTime = null;
         String endTime   = null;
 
-        // --- 策略1：关键词匹配，在关键词行及其前 3 行找时间 ---
+        // --- 策略1：关键词匹配 ---
         for (int i = 0; i < lines.length; i++) {
             String line = lines[i];
             boolean isStartLine = line.contains("开始充电") || line.contains("开始充電");
             boolean isEndLine   = line.contains("充电结束") || line.contains("充電結束")
                                 || line.contains("结束充电") || line.contains("結束充電");
 
-            if (isStartLine || isEndLine) {
-                // 在该行及向前 3 行内找时间（时间在关键词前面）
-                String timeFound = null;
-                for (int j = i; j >= Math.max(0, i - 3); j--) {
-                    List<String> ts = extractTimes(lines[j]);
-                    if (!ts.isEmpty()) {
-                        timeFound = ts.get(0);
+            if (!isStartLine && !isEndLine) continue;
+
+            // 先在当前行找时间
+            String timeFound = null;
+            List<String> ts = extractTimes(line);
+            if (!ts.isEmpty()) {
+                timeFound = ts.get(0);
+            }
+
+            // 当前行没有，再往前最多3行找，但遇到含另一关键词的行就停止
+            if (timeFound == null) {
+                for (int j = i - 1; j >= Math.max(0, i - 3); j--) {
+                    String prevLine = lines[j];
+                    // 如果这行包含另一个关键词，停止向前搜索
+                    boolean prevIsStart = prevLine.contains("开始充电") || prevLine.contains("开始充電");
+                    boolean prevIsEnd   = prevLine.contains("充电结束") || prevLine.contains("充電結束")
+                                        || prevLine.contains("结束充电") || prevLine.contains("結束充電");
+                    if (prevIsStart || prevIsEnd) break;
+
+                    List<String> pts = extractTimes(prevLine);
+                    if (!pts.isEmpty()) {
+                        timeFound = pts.get(0);
                         break;
                     }
                 }
-                if (timeFound != null) {
-                    if (isStartLine && startTime == null) startTime = timeFound;
-                    if (isEndLine   && endTime   == null) endTime   = timeFound;
-                }
+            }
+
+            if (timeFound != null) {
+                if (isStartLine && startTime == null) startTime = timeFound;
+                if (isEndLine   && endTime   == null) endTime   = timeFound;
             }
         }
 
