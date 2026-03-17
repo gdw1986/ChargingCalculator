@@ -335,11 +335,14 @@ public class MainActivity extends AppCompatActivity {
      *   灰驴子在3月17日9:26开始充电，当前电量15%。
      *   2026-03-17 09:26:11
      *
-     * 匹配策略（按优先级）：
-     *   1. 找到含关键词的行，先在该行本身提取时间
-     *   2. 该行没有则向前最多3行找，但不跨越含另一关键词的行
-     *   3. 如果没有关键词，取全图所有时间，小的=开始，大的=结束
-     *   4. 兜底：只识别到一个时间，两个字段都填
+    /**
+     * 自动模式：以 yyyy-MM-dd HH:mm:ss 完整时间戳为锚点，
+     * 向前最多5行找含"开始"或"结束"的行，判断该时间戳属于开始还是结束充电。
+     *
+     * 这样做的原因：完整时间戳不会被 OCR 误识别，而关键词中的汉字容易误识别
+     * （如"提"→"堤"、"束"→"東"），所以只需模糊判断含"开始"/"结束"即可。
+     *
+     * 兜底策略：找不到完整时间戳时，从全图所有 H:MM 时间里取最小=开始、最大=结束。
      */
     private void handleOcrAutoResult(String text) {
         String[] lines = text.split("\\n");
@@ -347,47 +350,41 @@ public class MainActivity extends AppCompatActivity {
         String startTime = null;
         String endTime   = null;
 
-        // --- 策略1：关键词匹配 ---
+        // 匹配 yyyy-MM-dd HH:mm:ss 或 yyyy-MM-dd HH:mm
+        Pattern fullTsPattern = Pattern.compile(
+                "\\d{4}-\\d{2}-\\d{2}\\s+([01]?\\d|2[0-3]):([0-5]\\d)(?::([0-5]\\d))?");
+
+        // --- 策略1：以完整时间戳为锚点，向前找"开始"/"结束"关键字 ---
         for (int i = 0; i < lines.length; i++) {
-            String line = lines[i];
-            boolean isStartLine = line.contains("开始充电") || line.contains("开始充電");
-            boolean isEndLine   = line.contains("充电结束") || line.contains("充電結束")
-                                || line.contains("结束充电") || line.contains("結束充電");
+            Matcher m = fullTsPattern.matcher(lines[i]);
+            if (!m.find()) continue;
 
-            if (!isStartLine && !isEndLine) continue;
+            // 提取时间（只保留 HH:mm）
+            String h = m.group(1);
+            String min = m.group(2);
+            String time = String.format(Locale.getDefault(), "%02d:%s", Integer.parseInt(h), min);
 
-            // 先在当前行找时间
-            String timeFound = null;
-            List<String> ts = extractTimes(line);
-            if (!ts.isEmpty()) {
-                timeFound = ts.get(0);
+            // 向前最多5行，找含"开始"或"结束"的行
+            boolean looksLikeStart = false;
+            boolean looksLikeEnd   = false;
+            for (int j = i - 1; j >= Math.max(0, i - 5); j--) {
+                String prev = lines[j];
+                if (prev.contains("开始") || prev.contains("開始")) { looksLikeStart = true; break; }
+                if (prev.contains("结束") || prev.contains("結束")
+                 || prev.contains("结東") || prev.contains("结束")) { looksLikeEnd = true; break; }
+            }
+            // 也检查时间戳所在行本身
+            if (!looksLikeStart && !looksLikeEnd) {
+                if (lines[i].contains("开始") || lines[i].contains("開始")) looksLikeStart = true;
+                if (lines[i].contains("结束") || lines[i].contains("結束")
+                 || lines[i].contains("结東")) looksLikeEnd = true;
             }
 
-            // 当前行没有，再往前最多3行找，但遇到含另一关键词的行就停止
-            if (timeFound == null) {
-                for (int j = i - 1; j >= Math.max(0, i - 3); j--) {
-                    String prevLine = lines[j];
-                    // 如果这行包含另一个关键词，停止向前搜索
-                    boolean prevIsStart = prevLine.contains("开始充电") || prevLine.contains("开始充電");
-                    boolean prevIsEnd   = prevLine.contains("充电结束") || prevLine.contains("充電結束")
-                                        || prevLine.contains("结束充电") || prevLine.contains("結束充電");
-                    if (prevIsStart || prevIsEnd) break;
-
-                    List<String> pts = extractTimes(prevLine);
-                    if (!pts.isEmpty()) {
-                        timeFound = pts.get(0);
-                        break;
-                    }
-                }
-            }
-
-            if (timeFound != null) {
-                if (isStartLine && startTime == null) startTime = timeFound;
-                if (isEndLine   && endTime   == null) endTime   = timeFound;
-            }
+            if (looksLikeStart && startTime == null) startTime = time;
+            if (looksLikeEnd   && endTime   == null) endTime   = time;
         }
 
-        // --- 策略2：没有关键词时，取全图所有时间，小的=开始，大的=结束 ---
+        // --- 策略2：没找到完整时间戳，从全图 H:MM 时间里取最小/最大 ---
         if (startTime == null && endTime == null) {
             List<String> allTimes = extractTimes(text);
             if (allTimes.size() >= 2) {
@@ -405,6 +402,7 @@ public class MainActivity extends AppCompatActivity {
                 startTime = allTimes.get(0);
                 endTime   = allTimes.get(0);
             }
+        }
         }
 
         // --- 应用结果 ---
