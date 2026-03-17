@@ -38,11 +38,6 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: ./gradlew assembleRelease --no-daemon
 
-      - name: Rename APK with build number
-        run: |
-          cp app/build/outputs/apk/release/app-release.apk \
-             app/build/outputs/apk/release/ChargingCalculator-${{ github.run_number }}.apk
-
       - name: Create Release and upload APK
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
@@ -51,4 +46,4 @@ jobs:
           name: "v1.0.${{ github.run_number }}"
           body: |
             Release build from commit ${{ github.sha }}
-          files: app/build/outputs/apk/release/ChargingCalculator-${{ github.run_number }}.apk
+          files: app/build/outputs/apk/release/app-release.apk
