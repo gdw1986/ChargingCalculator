@@ -24,82 +24,7 @@
             android:paddingTop="16dp"
             android:paddingBottom="8dp"/>
 
-        <!-- ========== 充电单价卡片 ========== -->
-        <androidx.cardview.widget.CardView
-            xmlns:card_view="http://schemas.android.com/apk/res-auto"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            card_view:cardCornerRadius="12dp"
-            card_view:cardElevation="4dp"
-            card_view:cardBackgroundColor="#FFFFFF">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="充电单价"
-                    android:textSize="14sp"
-                    android:textColor="#666666"
-                    android:paddingBottom="8dp"/>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                        android:hint="单价（元/小时）">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etPricePerHour"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="numberDecimal"
-                            android:imeOptions="actionDone"
-                            android:text="6.50"/>
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text=" 元/小时"
-                        android:textSize="14sp"
-                        android:textColor="#333333"
-                        android:paddingStart="8dp"/>
-
-                </LinearLayout>
-
-                <TextView
-                    android:id="@+id/tvSavedPrice"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="已保存默认单价：1.00 元/小时"
-                    android:textSize="12sp"
-                    android:textColor="#888888"
-                    android:paddingTop="6dp"/>
-
-                <Button
-                    android:id="@+id/btnSavePrice"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="保存为默认单价"
-                    android:textSize="13sp"
-                    android:layout_marginTop="8dp"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
-
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
+        
 
         <!-- ========== 开始时间卡片 ========== -->
         <androidx.cardview.widget.CardView
@@ -389,6 +314,82 @@
                     android:textSize="13sp"
                     android:textColor="#BBDEFB"
                     android:paddingTop="4dp"/>
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+        <!-- ========== 充电单价卡片 ========== -->
+        <androidx.cardview.widget.CardView
+            xmlns:card_view="http://schemas.android.com/apk/res-auto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            card_view:cardCornerRadius="12dp"
+            card_view:cardElevation="4dp"
+            card_view:cardBackgroundColor="#FFFFFF">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="充电单价"
+                    android:textSize="14sp"
+                    android:textColor="#666666"
+                    android:paddingBottom="8dp"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:hint="单价（元/小时）">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etPricePerHour"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:imeOptions="actionDone"
+                            android:text="6.50"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=" 元/小时"
+                        android:textSize="14sp"
+                        android:textColor="#333333"
+                        android:paddingStart="8dp"/>
+
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tvSavedPrice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="已保存默认单价：1.00 元/小时"
+                    android:textSize="12sp"
+                    android:textColor="#888888"
+                    android:paddingTop="6dp"/>
+
+                <Button
+                    android:id="@+id/btnSavePrice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="保存为默认单价"
+                    android:textSize="13sp"
+                    android:layout_marginTop="8dp"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
 
             </LinearLayout>
         </androidx.cardview.widget.CardView>
