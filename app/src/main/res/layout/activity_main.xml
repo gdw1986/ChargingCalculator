@@ -37,6 +37,50 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
+            app:cardBackgroundColor="#E8F5E9"
+            app:cardCornerRadius="10dp"
+            app:cardElevation="3dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="自动监听"
+                    android:textColor="#1B5E20"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvAutoListenerStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="通知权限：未开启"
+                    android:textColor="#4B5563"
+                    android:textSize="12sp" />
+
+                <Button
+                    android:id="@+id/btnOpenNotificationSettings"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="开启通知权限"
+                    android:textColor="#1B5E20"
+                    android:textSize="13sp" />
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
             app:cardBackgroundColor="#E3F2FD"
             app:cardCornerRadius="10dp"
             app:cardElevation="3dp">
@@ -50,7 +94,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="智能识别截图"
+                    android:text="截图识别（备用）"
                     android:textColor="#0D47A1"
                     android:textSize="16sp"
                     android:textStyle="bold" />

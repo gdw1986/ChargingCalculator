@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Toast;
@@ -93,6 +94,8 @@ public class MainActivity extends AppCompatActivity {
         // ---- 保存默认单价 ----
         binding.btnSavePrice.setOnClickListener(v -> saveDefaultPrice());
 
+        binding.btnOpenNotificationSettings.setOnClickListener(v -> openNotificationListenerSettings());
+
         // ---- 开始时间：时间选择器 ----
         binding.btnPickStartTime.setOnClickListener(v -> showTimePicker(true));
 
@@ -121,6 +124,37 @@ public class MainActivity extends AppCompatActivity {
 
         // ---- 计算按钮 ----
         binding.btnCalculate.setOnClickListener(v -> calculate());
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshAutoListenerState();
+        applySavedNotificationTimes();
+    }
+
+    private void openNotificationListenerSettings() {
+        startActivity(new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS));
+    }
+
+    private void refreshAutoListenerState() {
+        boolean enabled = ChargingNotificationStore.isNotificationListenerEnabled(this);
+        binding.tvAutoListenerStatus.setText(enabled ? "通知权限：已开启" : "通知权限：未开启");
+        binding.btnOpenNotificationSettings.setText(enabled ? "管理通知权限" : "开启通知权限");
+    }
+
+    private void applySavedNotificationTimes() {
+        ChargingNotificationStore.Snapshot snapshot = ChargingNotificationStore.load(this);
+        if (!TextUtils.isEmpty(snapshot.startTime)) {
+            binding.etStartTime.setText(snapshot.startTime);
+            binding.tvOcrStartResult.setText("最近开始通知：" + snapshot.startTime);
+            binding.tvOcrStartResult.setVisibility(View.VISIBLE);
+        }
+        if (!TextUtils.isEmpty(snapshot.endTime)) {
+            binding.etEndTime.setText(snapshot.endTime);
+            binding.tvOcrEndResult.setText("最近结束通知：" + snapshot.endTime);
+            binding.tvOcrEndResult.setVisibility(View.VISIBLE);
+        }
     }
 
     // ========================================================
