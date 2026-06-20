@@ -30,38 +30,22 @@ final class OcrTimeParser {
 
         Result result = new Result();
 
-        for (String line : lines) {
-            Label label = labelForLine(line);
-            if (label == Label.NONE) continue;
-
-            Matcher matcher = TIME_PATTERN.matcher(line);
-            while (matcher.find()) {
-                TimeCandidate candidate = toTimeCandidate(matcher);
-                if (candidate != null) assignLabeledTime(result, label, candidate.minuteValue);
-            }
-        }
-
-        for (int i = 0; i < lines.length; i++) {
-            Matcher matcher = DATE_TIME_PATTERN.matcher(lines[i]);
-            while (matcher.find()) {
-                TimeCandidate candidate = toDateTimeCandidate(matcher);
-                if (candidate == null) continue;
-
-                Label label = findNearestLabel(lines, i);
-                assignLabeledTime(result, label, candidate.minuteValue);
-            }
-        }
+        result.startTime = findFirstLabeledTime(lines, Label.START);
+        result.endTime = findFirstLabeledTime(lines, Label.END);
 
         fillMissingTimes(result, extractTimeCandidates(normalizedText));
         return result;
     }
 
-    private static void assignLabeledTime(Result result, Label label, String time) {
-        if (label == Label.START && result.startTime == null) {
-            result.startTime = time;
-        } else if (label == Label.END && result.endTime == null) {
-            result.endTime = time;
-        }
+    static String parseSingle(String text, boolean forStart) {
+        String normalizedText = normalizeOcrText(text);
+        String[] lines = normalizedText.split("\\r?\\n|\\r");
+
+        String labeledTime = findFirstLabeledTime(lines, forStart ? Label.START : Label.END);
+        if (labeledTime != null) return labeledTime;
+
+        List<String> times = extractTimes(normalizedText);
+        return times.isEmpty() ? null : times.get(0);
     }
 
     static List<String> extractTimes(String text) {
@@ -72,6 +56,44 @@ final class OcrTimeParser {
             }
         }
         return times;
+    }
+
+    private static String findFirstLabeledTime(String[] lines, Label target) {
+        for (int i = 0; i < lines.length; i++) {
+            if (labelForLine(lines[i]) != target) continue;
+
+            String time = findBestTimeInMessageBlock(lines, i);
+            if (time != null) return time;
+        }
+        return null;
+    }
+
+    private static String findBestTimeInMessageBlock(String[] lines, int labelLineIndex) {
+        int end = Math.min(lines.length - 1, labelLineIndex + 4);
+        for (int i = labelLineIndex + 1; i <= end; i++) {
+            if (isReminderTitle(lines[i])) {
+                end = i - 1;
+                break;
+            }
+        }
+
+        for (int i = labelLineIndex; i <= end; i++) {
+            Matcher matcher = DATE_TIME_PATTERN.matcher(lines[i]);
+            while (matcher.find()) {
+                TimeCandidate candidate = toDateTimeCandidate(matcher);
+                if (candidate != null) return candidate.minuteValue;
+            }
+        }
+
+        for (int i = labelLineIndex; i <= end; i++) {
+            Matcher matcher = TIME_PATTERN.matcher(lines[i]);
+            while (matcher.find()) {
+                TimeCandidate candidate = toTimeCandidate(matcher);
+                if (candidate != null) return candidate.minuteValue;
+            }
+        }
+
+        return null;
     }
 
     private static void fillMissingTimes(Result result, List<TimeCandidate> candidates) {
@@ -171,22 +193,6 @@ final class OcrTimeParser {
         return null;
     }
 
-    private static Label findNearestLabel(String[] lines, int timestampLineIndex) {
-        int start = Math.max(0, timestampLineIndex - 5);
-        for (int i = timestampLineIndex; i >= start; i--) {
-            Label label = labelForLine(lines[i]);
-            if (label != Label.NONE) return label;
-        }
-
-        int end = Math.min(lines.length - 1, timestampLineIndex + 3);
-        for (int i = timestampLineIndex + 1; i <= end; i++) {
-            Label label = labelForLine(lines[i]);
-            if (label != Label.NONE) return label;
-        }
-
-        return Label.NONE;
-    }
-
     private static Label labelForLine(String line) {
         String compact = line.replaceAll("\\s+", "");
         boolean start = looksLikeStart(compact);
@@ -194,6 +200,11 @@ final class OcrTimeParser {
         if (start && !end) return Label.START;
         if (end && !start) return Label.END;
         return Label.NONE;
+    }
+
+    private static boolean isReminderTitle(String line) {
+        String compact = line.replaceAll("\\s+", "");
+        return compact.contains("提醒") && labelForLine(compact) != Label.NONE;
     }
 
     private static boolean looksLikeStart(String line) {

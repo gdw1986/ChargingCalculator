@@ -296,17 +296,19 @@ public class MainActivity extends AppCompatActivity {
      * 单字段模式：仅填充开始或结束时间
      */
     private void handleOcrSingleResult(String text) {
+        String chosen = OcrTimeParser.parseSingle(text, isPickingStartTime);
         List<String> times = OcrTimeParser.extractTimes(text);
-        if (times.isEmpty()) {
+        if (chosen == null) {
             Toast.makeText(this, "未在图片中识别到时间，请手动输入", Toast.LENGTH_LONG).show();
             updateOcrResultView("未识别到时间");
             return;
         }
-        String chosen = times.get(0);
         applyTime(chosen);
-        String msg = times.size() == 1
-                ? "识别到时间：" + chosen
-                : "识别到 " + times.size() + " 个时间，已选用第一个：" + chosen + "\n全部：" + joinTimes(times);
+        String fieldName = isPickingStartTime ? "开始" : "结束";
+        String msg = "识别" + fieldName + "时间：" + chosen;
+        if (times.size() > 1) {
+            msg += "\n全部：" + joinTimes(times);
+        }
         updateOcrResultView(msg);
     }
 
