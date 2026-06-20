@@ -87,6 +87,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initViews() {
+        binding.tvAppVersion.setText(
+                String.format(Locale.getDefault(), "版本 %s", BuildConfig.VERSION_NAME));
+
         // ---- 保存默认单价 ----
         binding.btnSavePrice.setOnClickListener(v -> saveDefaultPrice());
 

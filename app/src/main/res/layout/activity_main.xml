@@ -24,7 +24,16 @@
             android:paddingTop="16dp"
             android:paddingBottom="8dp"/>
 
-        
+        <TextView
+            android:id="@+id/tvAppVersion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="版本 --"
+            android:textSize="12sp"
+            android:textColor="#6B7280"
+            android:gravity="center"
+            android:paddingBottom="4dp"/>
+
 
         <!-- ========== 开始时间卡片 ========== -->
         <androidx.cardview.widget.CardView
