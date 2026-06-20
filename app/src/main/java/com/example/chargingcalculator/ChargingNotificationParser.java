@@ -34,17 +34,28 @@ final class ChargingNotificationParser {
     }
 
     private static boolean looksLikeStart(String text) {
-        return text.contains("开始充电提醒")
-                || text.contains("開始充電提醒")
-                || (text.contains("当前电量") && (text.contains("开始充电") || text.contains("開始充電")));
+        String compact = compact(text);
+        return compact.contains("开始充电提醒")
+                || compact.contains("開始充電提醒")
+                || compact.contains("小迪提醒您:开始充电")
+                || compact.contains("小迪提醒您：开始充电")
+                || (compact.contains("当前电量")
+                && (compact.contains("开始充电") || compact.contains("開始充電")));
     }
 
     private static boolean looksLikeEnd(String text) {
-        return text.contains("结束充电提醒")
-                || text.contains("結束充電提醒")
-                || (text.contains("当前电量")
-                && (text.contains("结束充电") || text.contains("充电结束")
-                || text.contains("結束充電") || text.contains("充電結束")));
+        String compact = compact(text);
+        return compact.contains("结束充电提醒")
+                || compact.contains("結束充電提醒")
+                || compact.contains("小迪提醒您:结束充电")
+                || compact.contains("小迪提醒您：结束充电")
+                || (compact.contains("当前电量")
+                && (compact.contains("结束充电") || compact.contains("充电结束")
+                || compact.contains("結束充電") || compact.contains("充電結束")));
+    }
+
+    private static String compact(String text) {
+        return text.replaceAll("\\s+", "");
     }
 
     private static String formatTime(long timeMillis) {

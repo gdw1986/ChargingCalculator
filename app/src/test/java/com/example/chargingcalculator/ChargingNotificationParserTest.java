@@ -18,6 +18,20 @@ public class ChargingNotificationParserTest {
     }
 
     @Test
+    public void parse_handlesXiaodiReminderAndWrappedTime() {
+        String text = "小迪提醒您：开始充\n"
+                + "电\n"
+                + "灰驴子在6月20日19:\n"
+                + "05开始充电，当前电\n"
+                + "量15%。";
+
+        ChargingNotificationParser.Result result = ChargingNotificationParser.parse(text, 0L);
+
+        assertEquals("19:05", result.startTime);
+        assertNull(result.endTime);
+    }
+
+    @Test
     public void parse_extractsEndTimeFromChargingNotification() {
         String text = "结束充电提醒\n"
                 + "灰驴子在6月20日19:01充电结束，当前电量15%。";
