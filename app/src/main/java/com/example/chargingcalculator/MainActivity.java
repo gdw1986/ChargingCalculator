@@ -139,8 +139,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void refreshAutoListenerState() {
         boolean enabled = ChargingNotificationStore.isNotificationListenerEnabled(this);
-        binding.tvAutoListenerStatus.setText(enabled ? "通知权限：已开启" : "通知权限：未开启");
-        binding.btnOpenNotificationSettings.setText(enabled ? "管理通知权限" : "开启通知权限");
+        binding.tvAutoListenerStatus.setText(
+                enabled ? "通知权限：已开启，等待充电通知" : "通知权限：未开启");
+        binding.btnOpenNotificationSettings.setVisibility(enabled ? View.GONE : View.VISIBLE);
+        binding.btnOpenNotificationSettings.setText("开启通知权限");
     }
 
     private void applySavedNotificationTimes() {
