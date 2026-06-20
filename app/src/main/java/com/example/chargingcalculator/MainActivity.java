@@ -307,8 +307,8 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
         applyTime(chosen);
-        String fieldName = isPickingStartTime ? "开始" : "结束";
-        String msg = "识别" + fieldName + "时间：" + chosen;
+        String fieldName = isPickingStartTime ? "最近开始提醒" : "最近结束提醒";
+        String msg = fieldName + "：" + chosen;
         if (times.size() > 1) {
             msg += "\n全部：" + joinTimes(times);
         }
@@ -333,12 +333,12 @@ public class MainActivity extends AppCompatActivity {
 
         if (startTime != null) {
             binding.etStartTime.setText(startTime);
-            binding.tvOcrStartResult.setText("识别开始时间：" + startTime);
+            binding.tvOcrStartResult.setText("最近开始提醒：" + startTime);
             binding.tvOcrStartResult.setVisibility(View.VISIBLE);
         }
         if (endTime != null) {
             binding.etEndTime.setText(endTime);
-            binding.tvOcrEndResult.setText("识别结束时间：" + endTime);
+            binding.tvOcrEndResult.setText("最近结束提醒：" + endTime);
             binding.tvOcrEndResult.setVisibility(View.VISIBLE);
         }
 

@@ -12,38 +12,34 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- 标题栏 -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="⚡ 充电费用计算器"
-            android:textSize="22sp"
-            android:textStyle="bold"
-            android:textColor="#1A1A2E"
             android:gravity="center"
             android:paddingTop="16dp"
-            android:paddingBottom="8dp"/>
+            android:text="充电费用计算器"
+            android:textColor="#111827"
+            android:textSize="22sp"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/tvAppVersion"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="版本 --"
-            android:textSize="12sp"
-            android:textColor="#6B7280"
             android:gravity="center"
-            android:paddingBottom="4dp"/>
+            android:paddingTop="2dp"
+            android:paddingBottom="12dp"
+            android:text="版本 --"
+            android:textColor="#9CA3AF"
+            android:textSize="11sp" />
 
-
-        <!-- ========== 开始时间卡片 ========== -->
         <androidx.cardview.widget.CardView
-            xmlns:card_view="http://schemas.android.com/apk/res-auto"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            card_view:cardCornerRadius="12dp"
-            card_view:cardElevation="4dp"
-            card_view:cardBackgroundColor="#FFFFFF">
+            android:layout_marginTop="4dp"
+            app:cardBackgroundColor="#E3F2FD"
+            app:cardCornerRadius="10dp"
+            app:cardElevation="3dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -52,88 +48,45 @@
                 android:padding="16dp">
 
                 <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="充电开始时间"
-                    android:textSize="14sp"
-                    android:textColor="#666666"
-                    android:paddingBottom="8dp"/>
-
-                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
+                    android:text="智能识别截图"
+                    android:textColor="#0D47A1"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
 
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                        android:hint="格式：HH:mm 或 HH:mm:ss">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etStartTime"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="time"
-                            android:imeOptions="actionNext"/>
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <ImageButton
-                        android:id="@+id/btnPickStartTime"
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:src="@android:drawable/ic_menu_edit"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:contentDescription="时间选择"
-                        android:tint="#1976D2"
-                        android:layout_marginStart="8dp"/>
-
-                </LinearLayout>
-
-                <!-- OCR 按钮区域 -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="10dp"
-                    android:gravity="center_vertical">
-
-                    <Button
-                        android:id="@+id/btnOcrStart"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="📷 从图片识别开始时间"
-                        android:textSize="13sp"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
-
-                </LinearLayout>
-
-                <!-- OCR 识别结果 -->
                 <TextView
-                    android:id="@+id/tvOcrStartResult"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text=""
-                    android:textSize="12sp"
-                    android:textColor="#1976D2"
-                    android:paddingTop="4dp"
-                    android:visibility="gone"/>
+                    android:layout_marginTop="4dp"
+                    android:text="最近提醒 · 开始 / 结束"
+                    android:textColor="#4B5563"
+                    android:textSize="12sp" />
+
+                <Button
+                    android:id="@+id/btnOcrAuto"
+                    style="@style/Widget.MaterialComponents.Button"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="14dp"
+                    android:backgroundTint="#1976D2"
+                    android:drawableStart="@android:drawable/ic_menu_camera"
+                    android:drawablePadding="8dp"
+                    android:gravity="center"
+                    android:text="一键识别截图"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
 
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- ========== 结束时间卡片 ========== -->
         <androidx.cardview.widget.CardView
-            xmlns:card_view="http://schemas.android.com/apk/res-auto"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            card_view:cardCornerRadius="12dp"
-            card_view:cardElevation="4dp"
-            card_view:cardBackgroundColor="#FFFFFF">
+            app:cardBackgroundColor="#FFFFFF"
+            app:cardCornerRadius="10dp"
+            app:cardElevation="3dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -142,199 +95,218 @@
                 android:padding="16dp">
 
                 <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="充电结束时间"
-                    android:textSize="14sp"
-                    android:textColor="#666666"
-                    android:paddingBottom="8dp"/>
-
-                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
+                    android:text="充电时间"
+                    android:textColor="#111827"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
 
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                        android:hint="格式：HH:mm 或 HH:mm:ss">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etEndTime"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="time"
-                            android:imeOptions="actionDone"/>
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <ImageButton
-                        android:id="@+id/btnPickEndTime"
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:src="@android:drawable/ic_menu_edit"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:contentDescription="时间选择"
-                        android:tint="#1976D2"
-                        android:layout_marginStart="8dp"/>
-
-                </LinearLayout>
-
-                <LinearLayout
+                <TextView
+                    android:id="@+id/tvOcrStartResult"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="10dp">
-
-                    <Button
-                        android:id="@+id/btnOcrEnd"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="📷 从图片识别结束时间"
-                        android:textSize="13sp"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
-
-                </LinearLayout>
+                    android:layout_marginTop="8dp"
+                    android:text=""
+                    android:textColor="#1976D2"
+                    android:textSize="12sp"
+                    android:visibility="gone" />
 
                 <TextView
                     android:id="@+id/tvOcrEndResult"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
                     android:text=""
-                    android:textSize="12sp"
                     android:textColor="#1976D2"
-                    android:paddingTop="4dp"
-                    android:visibility="gone"/>
-
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-        <!-- ========== 一键识别全图卡片 ========== -->
-        <androidx.cardview.widget.CardView
-            xmlns:card_view="http://schemas.android.com/apk/res-auto"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            card_view:cardCornerRadius="12dp"
-            card_view:cardElevation="4dp"
-            card_view:cardBackgroundColor="#E3F2FD">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="✨ 智能识别（推荐）"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    android:textColor="#1565C0"
-                    android:paddingBottom="6dp"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="选一张含「开始充电提醒」和「结束充电提醒」的截图，自动识别并填入两个时间"
                     android:textSize="12sp"
-                    android:textColor="#555555"
-                    android:paddingBottom="10dp"/>
+                    android:visibility="gone" />
 
-                <Button
-                    android:id="@+id/btnOcrAuto"
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:text="📋 一键识别充电截图"
-                    android:textSize="15sp"
-                    android:textStyle="bold"
-                    android:backgroundTint="#1976D2"
-                    style="@style/Widget.MaterialComponents.Button"/>
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
+                    <TextView
+                        android:layout_width="56dp"
+                        android:layout_height="wrap_content"
+                        android:text="开始"
+                        android:textColor="#4B5563"
+                        android:textSize="14sp" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:hint="HH:mm">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etStartTime"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:imeOptions="actionNext"
+                            android:inputType="time" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <ImageButton
+                        android:id="@+id/btnPickStartTime"
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:layout_marginStart="8dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="选择开始时间"
+                        android:src="@android:drawable/ic_menu_edit"
+                        android:tint="#1976D2" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="56dp"
+                        android:layout_height="wrap_content"
+                        android:text="结束"
+                        android:textColor="#4B5563"
+                        android:textSize="14sp" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:hint="HH:mm">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etEndTime"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:imeOptions="actionDone"
+                            android:inputType="time" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <ImageButton
+                        android:id="@+id/btnPickEndTime"
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:layout_marginStart="8dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="选择结束时间"
+                        android:src="@android:drawable/ic_menu_edit"
+                        android:tint="#1976D2" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/btnOcrStart"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="6dp"
+                        android:layout_weight="1"
+                        android:text="只识别开始"
+                        android:textSize="13sp" />
+
+                    <Button
+                        android:id="@+id/btnOcrEnd"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp"
+                        android:layout_weight="1"
+                        android:text="只识别结束"
+                        android:textSize="13sp" />
+
+                </LinearLayout>
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- ========== 计算按钮 ========== -->
         <Button
             android:id="@+id/btnCalculate"
+            style="@style/Widget.MaterialComponents.Button"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:text="计 算"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:layout_marginTop="16dp"
+            android:layout_height="54dp"
+            android:layout_marginTop="14dp"
             android:backgroundTint="#1976D2"
-            style="@style/Widget.MaterialComponents.Button"/>
+            android:text="计算费用"
+            android:textSize="17sp"
+            android:textStyle="bold" />
 
-        <!-- ========== 结果卡片 ========== -->
         <androidx.cardview.widget.CardView
-            xmlns:card_view="http://schemas.android.com/apk/res-auto"
             android:id="@+id/cardResult"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            card_view:cardCornerRadius="12dp"
-            card_view:cardElevation="6dp"
-            card_view:cardBackgroundColor="#1976D2"
-            android:visibility="gone">
+            android:layout_marginTop="12dp"
+            android:visibility="gone"
+            app:cardBackgroundColor="#1976D2"
+            app:cardCornerRadius="10dp"
+            app:cardElevation="4dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:gravity="center"
                 android:orientation="vertical"
-                android:padding="20dp"
-                android:gravity="center">
+                android:padding="20dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="计算结果"
-                    android:textSize="14sp"
-                    android:textColor="#BBDEFB"/>
-
-                <TextView
-                    android:id="@+id/tvDuration"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="充电时长：-- 小时 -- 分钟"
-                    android:textSize="16sp"
-                    android:textColor="#FFFFFF"
-                    android:paddingTop="8dp"/>
+                    android:textColor="#BBDEFB"
+                    android:textSize="14sp" />
 
                 <TextView
                     android:id="@+id/tvAmount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:paddingTop="6dp"
                     android:text="¥ 0.00"
-                    android:textSize="40sp"
-                    android:textStyle="bold"
                     android:textColor="#FFFFFF"
-                    android:paddingTop="8dp"/>
+                    android:textSize="40sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvDuration"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="4dp"
+                    android:text="充电时长：-- 小时 -- 分钟"
+                    android:textColor="#FFFFFF"
+                    android:textSize="15sp" />
 
                 <TextView
                     android:id="@+id/tvDetail"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:paddingTop="4dp"
                     android:text=""
-                    android:textSize="13sp"
                     android:textColor="#BBDEFB"
-                    android:paddingTop="4dp"/>
+                    android:textSize="13sp" />
 
             </LinearLayout>
         </androidx.cardview.widget.CardView>
-        <!-- ========== 充电单价卡片 ========== -->
+
         <androidx.cardview.widget.CardView
-            xmlns:card_view="http://schemas.android.com/apk/res-auto"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            card_view:cardCornerRadius="12dp"
-            card_view:cardElevation="4dp"
-            card_view:cardBackgroundColor="#FFFFFF">
+            app:cardBackgroundColor="#FFFFFF"
+            app:cardCornerRadius="10dp"
+            app:cardElevation="3dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -343,70 +315,62 @@
                 android:padding="16dp">
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="充电单价"
-                    android:textSize="14sp"
-                    android:textColor="#666666"
-                    android:paddingBottom="8dp"/>
+                    android:text="单价设置"
+                    android:textColor="#111827"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
+                    android:layout_marginTop="12dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
                     <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                        android:hint="单价（元/小时）">
+                        android:hint="元/小时">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etPricePerHour"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="numberDecimal"
                             android:imeOptions="actionDone"
-                            android:text="6.50"/>
+                            android:inputType="numberDecimal"
+                            android:text="6.50" />
                     </com.google.android.material.textfield.TextInputLayout>
 
-                    <TextView
+                    <Button
+                        android:id="@+id/btnSavePrice"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text=" 元/小时"
-                        android:textSize="14sp"
-                        android:textColor="#333333"
-                        android:paddingStart="8dp"/>
+                        android:layout_marginStart="10dp"
+                        android:text="保存"
+                        android:textSize="13sp" />
 
                 </LinearLayout>
 
                 <TextView
                     android:id="@+id/tvSavedPrice"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:paddingTop="6dp"
                     android:text="已保存默认单价：1.00 元/小时"
-                    android:textSize="12sp"
                     android:textColor="#888888"
-                    android:paddingTop="6dp"/>
-
-                <Button
-                    android:id="@+id/btnSavePrice"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="保存为默认单价"
-                    android:textSize="13sp"
-                    android:layout_marginTop="8dp"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+                    android:textSize="12sp" />
 
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- 底部间距 -->
         <View
             android:layout_width="match_parent"
-            android:layout_height="24dp"/>
+            android:layout_height="24dp" />
 
     </LinearLayout>
 </ScrollView>
