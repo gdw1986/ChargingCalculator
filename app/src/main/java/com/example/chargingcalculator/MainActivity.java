@@ -25,12 +25,9 @@ import com.google.mlkit.vision.text.TextRecognizer;
 import com.google.mlkit.vision.text.chinese.ChineseTextRecognizerOptions;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -299,7 +296,7 @@ public class MainActivity extends AppCompatActivity {
      * 单字段模式：仅填充开始或结束时间
      */
     private void handleOcrSingleResult(String text) {
-        List<String> times = extractTimes(text);
+        List<String> times = OcrTimeParser.extractTimes(text);
         if (times.isEmpty()) {
             Toast.makeText(this, "未在图片中识别到时间，请手动输入", Toast.LENGTH_LONG).show();
             updateOcrResultView("未识别到时间");
@@ -314,85 +311,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * 自动模式：通过"开始充电"/"充电结束"关键词分别提取两个时间。
-     *
-     * 截图实际格式（时间与关键词在同一行）：
-     *   结束充电提醒
-     *   灰驴子在3月17日16:23充电结束，当前电量100%。
-     *   2026-03-17 16:23:52
-     *
-     *   开始充电提醒
-     *   灰驴子在3月17日9:26开始充电，当前电量15%。
-     *   2026-03-17 09:26:11
-     *
-    /**
-     * 自动模式：以 yyyy-MM-dd HH:mm:ss 完整时间戳为锚点，
-     * 向前最多5行找含"开始"或"结束"的行，判断该时间戳属于开始还是结束充电。
-     *
-     * 这样做的原因：完整时间戳不会被 OCR 误识别，而关键词中的汉字容易误识别
-     * （如"提"→"堤"、"束"→"東"），所以只需模糊判断含"开始"/"结束"即可。
-     *
-     * 兜底策略：找不到完整时间戳时，从全图所有 H:MM 时间里取最小=开始、最大=结束。
+     * 自动模式：优先按"开始"/"结束"关键词归类时间，缺失字段再从全图时间中兜底。
      */
     private void handleOcrAutoResult(String text) {
-        String[] lines = text.split("\\n");
-
-        String startTime = null;
-        String endTime   = null;
-
-        // 匹配 yyyy-MM-dd HH:mm:ss 或 yyyy-MM-dd HH:mm
-        Pattern fullTsPattern = Pattern.compile(
-                "\\d{4}-\\d{2}-\\d{2}\\s+([01]?\\d|2[0-3]):([0-5]\\d)(?::([0-5]\\d))?");
-
-        // --- 策略1：以完整时间戳为锚点，向前找"开始"/"结束"关键字 ---
-        for (int i = 0; i < lines.length; i++) {
-            Matcher m = fullTsPattern.matcher(lines[i]);
-            if (!m.find()) continue;
-
-            // 提取时间（只保留 HH:mm）
-            String h = m.group(1);
-            String min = m.group(2);
-            String time = String.format(Locale.getDefault(), "%02d:%s", Integer.parseInt(h), min);
-
-            // 向前最多5行，找含"开始"或"结束"的行
-            boolean looksLikeStart = false;
-            boolean looksLikeEnd   = false;
-            for (int j = i - 1; j >= Math.max(0, i - 5); j--) {
-                String prev = lines[j];
-                if (prev.contains("开始") || prev.contains("開始")) { looksLikeStart = true; break; }
-                if (prev.contains("结束") || prev.contains("結束")
-                 || prev.contains("结東") || prev.contains("结束")) { looksLikeEnd = true; break; }
-            }
-            // 也检查时间戳所在行本身
-            if (!looksLikeStart && !looksLikeEnd) {
-                if (lines[i].contains("开始") || lines[i].contains("開始")) looksLikeStart = true;
-                if (lines[i].contains("结束") || lines[i].contains("結束")
-                 || lines[i].contains("结東")) looksLikeEnd = true;
-            }
-
-            if (looksLikeStart && startTime == null) startTime = time;
-            if (looksLikeEnd   && endTime   == null) endTime   = time;
-        }
-
-        // --- 策略2：没找到完整时间戳，从全图 H:MM 时间里取最小/最大 ---
-        if (startTime == null && endTime == null) {
-            List<String> allTimes = extractTimes(text);
-            if (allTimes.size() >= 2) {
-                allTimes.sort((a, b) -> {
-                    int[] ta = parseHourMinuteSecond(a);
-                    int[] tb = parseHourMinuteSecond(b);
-                    if (ta == null || tb == null) return 0;
-                    long sa = ta[0] * 3600L + ta[1] * 60L + ta[2];
-                    long sb = tb[0] * 3600L + tb[1] * 60L + tb[2];
-                    return Long.compare(sa, sb);
-                });
-                startTime = allTimes.get(0);
-                endTime   = allTimes.get(allTimes.size() - 1);
-            } else if (allTimes.size() == 1) {
-                startTime = allTimes.get(0);
-                endTime   = allTimes.get(0);
-            }
-        }
+        OcrTimeParser.Result parsed = OcrTimeParser.parseAuto(text);
+        String startTime = parsed.startTime;
+        String endTime   = parsed.endTime;
 
         // --- 应用结果 ---
         if (startTime == null && endTime == null) {
@@ -444,47 +368,6 @@ public class MainActivity extends AppCompatActivity {
             sb.append(times.get(i));
         }
         return sb.toString();
-    }
-
-    /**
-     * 从文本中提取所有时间字符串。
-     *
-     * 优先级1：独立的 H:MM 或 HH:MM（前后不紧跟数字/冒号/连字符，避免误匹配日期）
-     * 优先级2：yyyy-MM-dd HH:mm:ss / yyyy-MM-dd HH:mm 中的时间部分（兜底）
-     */
-    private List<String> extractTimes(String text) {
-        List<String> result = new ArrayList<>();
-
-        // 优先级1：H:MM 或 HH:MM（独立时间，前后不是数字或额外的冒号）
-        // 负向后顾：前面不能是数字或连字符（避免匹配日期里的 MM-dd）
-        // 负向前瞻：后面不能紧跟冒号+数字（避免匹配 HH:mm:ss 中间片段）
-        Pattern timePattern = Pattern.compile(
-                "(?<![\\d\\-:])([01]?\\d|2[0-3]):([0-5]\\d)(?!:\\d)(?!\\d)");
-        Matcher tMatcher = timePattern.matcher(text);
-        while (tMatcher.find()) {
-            String h = tMatcher.group(1);
-            String m = tMatcher.group(2);
-            String formatted = String.format(Locale.getDefault(), "%02d:%s", Integer.parseInt(h), m);
-            if (!result.contains(formatted)) result.add(formatted);
-        }
-
-        // 优先级2：yyyy-MM-dd HH:mm:ss 或 yyyy-MM-dd HH:mm（没找到独立时间时兜底）
-        if (result.isEmpty()) {
-            Pattern dateTimePattern = Pattern.compile(
-                    "\\d{4}-\\d{2}-\\d{2}\\s+([01]?\\d|2[0-3]):([0-5]\\d)(?::([0-5]\\d))?");
-            Matcher dtMatcher = dateTimePattern.matcher(text);
-            while (dtMatcher.find()) {
-                String h = dtMatcher.group(1);
-                String m = dtMatcher.group(2);
-                String s = dtMatcher.group(3);
-                String formatted = s != null
-                        ? String.format(Locale.getDefault(), "%02d:%s:%s", Integer.parseInt(h), m, s)
-                        : String.format(Locale.getDefault(), "%02d:%s", Integer.parseInt(h), m);
-                if (!result.contains(formatted)) result.add(formatted);
-            }
-        }
-
-        return result;
     }
 
     // ========================================================
