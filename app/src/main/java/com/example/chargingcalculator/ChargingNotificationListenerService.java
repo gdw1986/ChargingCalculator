@@ -1,23 +1,60 @@
 package com.example.chargingcalculator;
 
 import android.app.Notification;
+import android.content.Intent;
 import android.os.Bundle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class ChargingNotificationListenerService extends NotificationListenerService {
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
-        if (sbn == null || getPackageName().equals(sbn.getPackageName())) return;
+        if (processNotification(sbn)) {
+            notifyTimesChanged();
+        }
+    }
+
+    @Override
+    public void onListenerConnected() {
+        super.onListenerConnected();
+        scanActiveNotifications();
+    }
+
+    private void scanActiveNotifications() {
+        StatusBarNotification[] activeNotifications;
+        try {
+            activeNotifications = getActiveNotifications();
+        } catch (SecurityException ignored) {
+            return;
+        }
+        if (activeNotifications == null || activeNotifications.length == 0) return;
+
+        Arrays.sort(activeNotifications, (a, b) -> Long.compare(a.getPostTime(), b.getPostTime()));
+        boolean changed = false;
+        for (StatusBarNotification activeNotification : activeNotifications) {
+            if (processNotification(activeNotification)) changed = true;
+        }
+        if (changed) notifyTimesChanged();
+    }
+
+    private boolean processNotification(StatusBarNotification sbn) {
+        if (sbn == null || getPackageName().equals(sbn.getPackageName())) return false;
 
         String notificationText = extractNotificationText(sbn.getNotification());
         ChargingNotificationParser.Result result =
                 ChargingNotificationParser.parse(notificationText, sbn.getPostTime());
-        ChargingNotificationStore.save(this, result);
+        return ChargingNotificationStore.save(this, result);
+    }
+
+    private void notifyTimesChanged() {
+        Intent intent = new Intent(ChargingNotificationStore.ACTION_NOTIFICATION_TIMES_CHANGED);
+        intent.setPackage(getPackageName());
+        sendBroadcast(intent);
     }
 
     private String extractNotificationText(Notification notification) {

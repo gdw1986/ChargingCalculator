@@ -9,6 +9,9 @@ import android.text.TextUtils;
 import java.util.Locale;
 
 final class ChargingNotificationStore {
+    static final String ACTION_NOTIFICATION_TIMES_CHANGED =
+            "com.example.chargingcalculator.ACTION_NOTIFICATION_TIMES_CHANGED";
+
     private static final String PREFS_NAME = "ChargingPrefs";
     private static final String KEY_AUTO_START_TIME = "auto_start_time";
     private static final String KEY_AUTO_END_TIME = "auto_end_time";
@@ -17,8 +20,8 @@ final class ChargingNotificationStore {
     private ChargingNotificationStore() {
     }
 
-    static void save(Context context, ChargingNotificationParser.Result result) {
-        if (result == null) return;
+    static boolean save(Context context, ChargingNotificationParser.Result result) {
+        if (result == null) return false;
         SharedPreferences.Editor editor = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit();
         boolean changed = false;
         if (!TextUtils.isEmpty(result.startTime)) {
@@ -33,6 +36,7 @@ final class ChargingNotificationStore {
             editor.putLong(KEY_AUTO_LAST_UPDATED, System.currentTimeMillis());
             editor.apply();
         }
+        return changed;
     }
 
     static Snapshot load(Context context) {

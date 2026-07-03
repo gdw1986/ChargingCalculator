@@ -2,7 +2,10 @@ package com.example.chargingcalculator;
 
 import android.Manifest;
 import android.app.TimePickerDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -49,6 +52,19 @@ public class MainActivity extends AppCompatActivity {
     private SharedPreferences prefs;
     private TextRecognizer recognizer;
 
+    private final BroadcastReceiver chargingNotificationReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent == null
+                    || !ChargingNotificationStore.ACTION_NOTIFICATION_TIMES_CHANGED.equals(intent.getAction())) {
+                return;
+            }
+            refreshAutoListenerState();
+            applySavedNotificationTimes();
+            Toast.makeText(MainActivity.this, "已从通知读取充电时间", Toast.LENGTH_SHORT).show();
+        }
+    };
+
     // 图片选择启动器
     private final ActivityResultLauncher<Intent> imagePickerLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
@@ -85,6 +101,23 @@ public class MainActivity extends AppCompatActivity {
 
         initViews();
         loadSavedPrice();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        IntentFilter filter = new IntentFilter(ChargingNotificationStore.ACTION_NOTIFICATION_TIMES_CHANGED);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(chargingNotificationReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
+        } else {
+            registerReceiver(chargingNotificationReceiver, filter);
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        unregisterReceiver(chargingNotificationReceiver);
+        super.onStop();
     }
 
     private void initViews() {
