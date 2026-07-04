@@ -61,7 +61,9 @@ public class MainActivity extends AppCompatActivity {
             }
             refreshAutoListenerState();
             applySavedNotificationTimes();
-            Toast.makeText(MainActivity.this, "已从通知读取充电时间", Toast.LENGTH_SHORT).show();
+            if (intent.getBooleanExtra(ChargingNotificationStore.EXTRA_TIMES_CHANGED, false)) {
+                Toast.makeText(MainActivity.this, "已从通知读取充电时间", Toast.LENGTH_SHORT).show();
+            }
         }
     };
 
@@ -127,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
         // ---- 保存默认单价 ----
         binding.btnSavePrice.setOnClickListener(v -> saveDefaultPrice());
 
-        binding.btnOpenNotificationSettings.setOnClickListener(v -> openNotificationListenerSettings());
+        binding.btnOpenNotificationSettings.setOnClickListener(v -> handleNotificationAction());
 
         // ---- 开始时间：时间选择器 ----
         binding.btnPickStartTime.setOnClickListener(v -> showTimePicker(true));
@@ -170,12 +172,40 @@ public class MainActivity extends AppCompatActivity {
         startActivity(new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS));
     }
 
+    private void handleNotificationAction() {
+        if (!ChargingNotificationStore.isNotificationListenerEnabled(this)) {
+            openNotificationListenerSettings();
+            return;
+        }
+
+        if (!ChargingNotificationListenerService.isConnected()) {
+            Toast.makeText(this, "监听服务未连接，请关闭再开启通知权限", Toast.LENGTH_LONG).show();
+            openNotificationListenerSettings();
+            return;
+        }
+
+        boolean changed = ChargingNotificationListenerService.scanActiveNotificationsNow();
+        refreshAutoListenerState();
+        applySavedNotificationTimes();
+        Toast.makeText(this,
+                changed ? "已从当前通知栏读取充电时间" : "已检查通知栏，未找到充电提醒",
+                Toast.LENGTH_SHORT).show();
+    }
+
     private void refreshAutoListenerState() {
         boolean enabled = ChargingNotificationStore.isNotificationListenerEnabled(this);
-        binding.tvAutoListenerStatus.setText(
-                enabled ? "通知权限：已开启，等待充电通知" : "通知权限：未开启");
-        binding.btnOpenNotificationSettings.setVisibility(enabled ? View.GONE : View.VISIBLE);
-        binding.btnOpenNotificationSettings.setText("开启通知权限");
+        boolean connected = ChargingNotificationListenerService.isConnected();
+        if (!enabled) {
+            binding.tvAutoListenerStatus.setText("通知权限：未开启");
+            binding.btnOpenNotificationSettings.setText("开启");
+        } else if (connected) {
+            binding.tvAutoListenerStatus.setText("通知权限：已开启，监听中");
+            binding.btnOpenNotificationSettings.setText("刷新");
+        } else {
+            binding.tvAutoListenerStatus.setText("通知权限：已开启，服务未连接");
+            binding.btnOpenNotificationSettings.setText("重连");
+        }
+        binding.btnOpenNotificationSettings.setVisibility(View.VISIBLE);
     }
 
     private void applySavedNotificationTimes() {

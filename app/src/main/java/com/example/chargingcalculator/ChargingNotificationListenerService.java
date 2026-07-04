@@ -12,34 +12,58 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class ChargingNotificationListenerService extends NotificationListenerService {
+    private static volatile ChargingNotificationListenerService activeService;
+
+    static boolean isConnected() {
+        return activeService != null;
+    }
+
+    static boolean scanActiveNotificationsNow() {
+        ChargingNotificationListenerService service = activeService;
+        return service != null && service.scanActiveNotifications();
+    }
+
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
         if (processNotification(sbn)) {
-            notifyTimesChanged();
+            notifyStateChanged(true);
         }
     }
 
     @Override
     public void onListenerConnected() {
         super.onListenerConnected();
-        scanActiveNotifications();
+        activeService = this;
+        notifyStateChanged(scanActiveNotifications());
     }
 
-    private void scanActiveNotifications() {
+    @Override
+    public void onListenerDisconnected() {
+        if (activeService == this) activeService = null;
+        super.onListenerDisconnected();
+    }
+
+    @Override
+    public void onDestroy() {
+        if (activeService == this) activeService = null;
+        super.onDestroy();
+    }
+
+    private boolean scanActiveNotifications() {
         StatusBarNotification[] activeNotifications;
         try {
             activeNotifications = getActiveNotifications();
         } catch (SecurityException ignored) {
-            return;
+            return false;
         }
-        if (activeNotifications == null || activeNotifications.length == 0) return;
+        if (activeNotifications == null || activeNotifications.length == 0) return false;
 
         Arrays.sort(activeNotifications, (a, b) -> Long.compare(a.getPostTime(), b.getPostTime()));
         boolean changed = false;
         for (StatusBarNotification activeNotification : activeNotifications) {
             if (processNotification(activeNotification)) changed = true;
         }
-        if (changed) notifyTimesChanged();
+        return changed;
     }
 
     private boolean processNotification(StatusBarNotification sbn) {
@@ -51,9 +75,10 @@ public class ChargingNotificationListenerService extends NotificationListenerSer
         return ChargingNotificationStore.save(this, result);
     }
 
-    private void notifyTimesChanged() {
+    private void notifyStateChanged(boolean timesChanged) {
         Intent intent = new Intent(ChargingNotificationStore.ACTION_NOTIFICATION_TIMES_CHANGED);
         intent.setPackage(getPackageName());
+        intent.putExtra(ChargingNotificationStore.EXTRA_TIMES_CHANGED, timesChanged);
         sendBroadcast(intent);
     }
 

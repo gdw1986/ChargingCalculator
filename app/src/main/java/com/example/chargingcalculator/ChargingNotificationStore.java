@@ -11,6 +11,8 @@ import java.util.Locale;
 final class ChargingNotificationStore {
     static final String ACTION_NOTIFICATION_TIMES_CHANGED =
             "com.example.chargingcalculator.ACTION_NOTIFICATION_TIMES_CHANGED";
+    static final String EXTRA_TIMES_CHANGED =
+            "com.example.chargingcalculator.EXTRA_TIMES_CHANGED";
 
     private static final String PREFS_NAME = "ChargingPrefs";
     private static final String KEY_AUTO_START_TIME = "auto_start_time";
