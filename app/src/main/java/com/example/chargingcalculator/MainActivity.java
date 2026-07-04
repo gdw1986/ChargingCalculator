@@ -164,6 +164,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        if (ChargingNotificationStore.isNotificationListenerEnabled(this)) {
+            ChargingNotificationListenerService.requestRebind(this);
+        }
         refreshAutoListenerState();
         applySavedNotificationTimes();
     }
@@ -178,15 +181,17 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        if (!ChargingNotificationListenerService.isConnected()) {
-            Toast.makeText(this, "监听服务未连接，请关闭再开启通知权限", Toast.LENGTH_LONG).show();
-            openNotificationListenerSettings();
+        boolean connected = ChargingNotificationListenerService.isConnected();
+        boolean changed = connected && ChargingNotificationListenerService.scanActiveNotificationsNow();
+        ChargingNotificationListenerService.requestRebind(this);
+        refreshAutoListenerState();
+        applySavedNotificationTimes();
+
+        if (!connected) {
+            Toast.makeText(this, "已请求系统连接通知监听，请稍后再试或等待新通知", Toast.LENGTH_LONG).show();
             return;
         }
 
-        boolean changed = ChargingNotificationListenerService.scanActiveNotificationsNow();
-        refreshAutoListenerState();
-        applySavedNotificationTimes();
         Toast.makeText(this,
                 changed ? "已从当前通知栏读取充电时间" : "已检查通知栏，未找到充电提醒",
                 Toast.LENGTH_SHORT).show();
@@ -194,16 +199,12 @@ public class MainActivity extends AppCompatActivity {
 
     private void refreshAutoListenerState() {
         boolean enabled = ChargingNotificationStore.isNotificationListenerEnabled(this);
-        boolean connected = ChargingNotificationListenerService.isConnected();
         if (!enabled) {
             binding.tvAutoListenerStatus.setText("通知权限：未开启");
             binding.btnOpenNotificationSettings.setText("开启");
-        } else if (connected) {
-            binding.tvAutoListenerStatus.setText("通知权限：已开启，监听中");
-            binding.btnOpenNotificationSettings.setText("刷新");
         } else {
-            binding.tvAutoListenerStatus.setText("通知权限：已开启，服务未连接");
-            binding.btnOpenNotificationSettings.setText("重连");
+            binding.tvAutoListenerStatus.setText("通知权限：已开启，等待充电通知");
+            binding.btnOpenNotificationSettings.setText("刷新");
         }
         binding.btnOpenNotificationSettings.setVisibility(View.VISIBLE);
     }

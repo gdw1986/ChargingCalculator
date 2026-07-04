@@ -1,6 +1,8 @@
 package com.example.chargingcalculator;
 
 import android.app.Notification;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.service.notification.NotificationListenerService;
@@ -21,6 +23,11 @@ public class ChargingNotificationListenerService extends NotificationListenerSer
     static boolean scanActiveNotificationsNow() {
         ChargingNotificationListenerService service = activeService;
         return service != null && service.scanActiveNotifications();
+    }
+
+    static void requestRebind(Context context) {
+        NotificationListenerService.requestRebind(new ComponentName(
+                context, ChargingNotificationListenerService.class));
     }
 
     @Override
